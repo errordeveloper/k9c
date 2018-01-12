@@ -44,6 +44,8 @@ items:
         name: "ide"
     spec:
       type: LoadBalancer
+      selector:
+        name: "ide"
       ports:
       - name: http
         port: 80
