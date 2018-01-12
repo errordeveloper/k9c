@@ -34,22 +34,23 @@ RUN apk add --no-cache --initdb --root /out \
 RUN mkdir -p /out/src/c9
 WORKDIR /out/src/c9
 RUN curl --silent 'https://codeload.github.com/c9/core/tar.gz/cfedceb' \
-  | tar xz && ln -s core-cfedceb core
+    | tar xz && ln -s core-cfedceb core
 
 WORKDIR /out/src/c9/core
 RUN npm install --production
 RUN npm install pty.js sqlite3@3.1.8 sequelize@2.0.0-beta.0 https://github.com/c9/nak/tarball/c9
 
 RUN mkdir -p /out/root/.c9 ; cd /out/root/.c9 ; \
-  mkdir -p bin ; ln -s /usr/bin/tmux bin/tmux ; \
-  mkdir -p node/bin ; ln -s /usr/local/bin/node node/bin/node ; \
-  mkdir -p node/bin ; ln -s /usr/local/bin/npm node/bin/npm ; \
-  ln -s ../../src/c9/core/node_modules node_modules ; \
-  echo 1 > installed
+    mkdir -p bin ; ln -s /usr/bin/tmux bin/tmux ; \
+    mkdir -p node/bin ; ln -s /usr/local/bin/node node/bin/node ; \
+    mkdir -p node/bin ; ln -s /usr/local/bin/npm node/bin/npm ; \
+    ln -s ../../src/c9/core/node_modules node_modules ; \
+    echo 1 > installed
 
 RUN rm -rf /out/etc/apk /out/lib/apk /out/var/cache
 
-RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output /out/usr/local/bin/kubectl
+RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output /out/usr/local/bin/kubectl \
+    && chmod +x /out/usr/local/bin/kubectl
 
 FROM scratch
 WORKDIR /
