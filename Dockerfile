@@ -48,11 +48,12 @@ RUN mkdir -p /out/root/.c9 ; cd /out/root/.c9 ; \
     echo 1 > installed
 
 RUN rm -rf /out/etc/apk /out/lib/apk /out/var/cache
+RUN mkdir -p /out/workspace
 
 RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output /out/usr/local/bin/kubectl \
     && chmod +x /out/usr/local/bin/kubectl
 
 FROM scratch
-WORKDIR /
-ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "--auth", "username:password" ]
+WORKDIR /workspace
+ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "--auth", "username:password", "-w", "/workspace" ]
 COPY --from=build  /out /

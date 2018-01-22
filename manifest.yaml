@@ -50,6 +50,16 @@ items:
       - name: http
         port: 80
         targetPort: 8080
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: workspace
+      namespace: k9c
+    spec:
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 2Gi
   - apiVersion: apps/v1beta1
     kind: Deployment
     metadata:
@@ -65,10 +75,24 @@ items:
         spec:
           serviceAccount: "ide"
           restartPolicy: Always
+          initContainers:
+            - name: "git-clone"
+              image: "errordeveloper/k9c@sha256:70bdb06a86213fb4af28f460219ad81ec71849a64ea4cfa11a10d572a9c222bb"
+              command: [ "/bin/sh", "-c", "test -d /workspace/app || git clone https://github.com/bricef/metrics-demo" ]
+              volumeMounts:
+                - name: workspace
+                  mountPath: /workspace
           containers:
             - name: "ide"
-              image: "errordeveloper/k9c"
+              image: "errordeveloper/k9c@sha256:70bdb06a86213fb4af28f460219ad81ec71849a64ea4cfa11a10d572a9c222bb"
               imagePullPolicy: IfNotPresent
               ports:
-              - name: http
-                containerPort: 8080
+                - name: http
+                  containerPort: 8080
+              volumeMounts:
+                - name: workspace
+                  mountPath: /workspace
+          volumes:
+            - name: workspace
+              persistentVolumeClaim:
+                claimName: workspace
