@@ -51,29 +51,38 @@ items:
       labels:
         name: ide
     spec:
-      type: LoadBalancer
       selector:
         name: ide
       ports:
       - name: http
-        port: 8080
+        port: 80
         targetPort: 8080
-  #- apiVersion: extensions/v1beta1
-  #  kind: Ingress
-  #  metadata:
-  #    name: ide
-  #    namespace: k9c
-  #  spec:
-  #    backend:
-  #      serviceName: ide
-  #      servicePort: http
-  #    #rules:
-  #    #  - http:
-  #    #      paths:
-  #    #        - path: /
-  #    #          backend:
-  #    #            serviceName: ide
-  #    #            servicePort: http
+  - apiVersion: extensions/v1beta1
+    kind: Ingress
+    metadata:
+      name: ide
+      namespace: k9c
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+        traefik.frontend.passHostHeader: "false"
+    spec:
+      backend:
+        serviceName: ide
+        servicePort: http
+      # TODO we can actually setup DNS and TLS with Let's Encrypt and external DNS
+      # https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/gke.md
+      # and use training.weave.works. DNS zone
+      rules:
+        - http:
+            paths:
+              - path: /
+                backend:
+                  serviceName: ide
+                  servicePort: http
+              - path: /app/metrics-demo
+                backend:
+                  serviceName: metrics-demo
+                  servicePort: http
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:

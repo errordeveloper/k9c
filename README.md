@@ -7,15 +7,16 @@ so all attendees need is a browser.
 
 Deploy it to a GKE cluster (or other provider with functional storage and external load balancers):
 ```
+kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/traefik.yaml
 kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/manifest.yaml
 ```
 
 Get exteral IP:
 ```
-kubectl get svc -n k9c ide -o jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'
+traefik_ip="$(kubectl get svc -n kube-system traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}')"
 ```
 
-Next, open it in your browser and login with `username:password`.
+Next, open `http://${traefik_ip}/` in your browser and login with `username:password`.
 
 Have a great Kubernetes experience with Cloud9 in your cluster!
 
