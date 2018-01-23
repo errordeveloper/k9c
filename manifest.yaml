@@ -51,22 +51,29 @@ items:
       labels:
         name: ide
     spec:
-      type: NodePort # required for GCE ingress controller to work, but it's not accessible from the outside
+      type: LoadBalancer
       selector:
         name: ide
       ports:
       - name: http
-        port: 80
+        port: 8080
         targetPort: 8080
-  - apiVersion: extensions/v1beta1
-    kind: Ingress
-    metadata:
-      name: ide
-      namespace: k9c
-    spec:
-      backend:
-        serviceName: ide
-        servicePort: http
+  #- apiVersion: extensions/v1beta1
+  #  kind: Ingress
+  #  metadata:
+  #    name: ide
+  #    namespace: k9c
+  #  spec:
+  #    backend:
+  #      serviceName: ide
+  #      servicePort: http
+  #    #rules:
+  #    #  - http:
+  #    #      paths:
+  #    #        - path: /
+  #    #          backend:
+  #    #            serviceName: ide
+  #    #            servicePort: http
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
@@ -92,6 +99,7 @@ items:
         spec:
           serviceAccount: ide
           restartPolicy: Always
+          terminationGracePeriodSeconds: 10
           initContainers:
             - name: git-clone
               image: errordeveloper/k9c@sha256:ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
@@ -106,6 +114,24 @@ items:
               ports:
                 - name: http
                   containerPort: 8080
+              livenessProbe:
+                httpGet:
+                  port: http
+                  path: /ide.html
+                  httpHeaders:
+                    - name: Authorization
+                      value: 'Basic dXNlcm5hbWU6cGFzc3dvcmQ='
+                initialDelaySeconds: 30
+                periodSeconds: 5
+              readinessProbe:
+                httpGet:
+                  port: http
+                  path: /ide.html
+                  httpHeaders:
+                    - name: Authorization
+                      value: 'Basic dXNlcm5hbWU6cGFzc3dvcmQ='
+                initialDelaySeconds: 5
+                periodSeconds: 1
               volumeMounts:
                 - name: workspace
                   mountPath: /workspace
