@@ -48,10 +48,17 @@ RUN mkdir -p /out/root/.c9 ; cd /out/root/.c9 ; \
     echo 1 > installed
 
 RUN rm -rf /out/etc/apk /out/lib/apk /out/var/cache
-RUN mkdir -p /out/workspace
 
-RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output /out/usr/local/bin/kubectl \
-    && chmod +x /out/usr/local/bin/kubectl
+
+WORKDIR /out
+
+RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output usr/local/bin/kubectl \
+    && chmod +x usr/local/bin/kubectl
+
+RUN curl --silent --location 'https://get.docker.com/builds/Linux/x86_64/docker-1.10.3.tgz' \
+  | tar xz usr/local/bin/docker
+
+RUN mkdir -p /out/workspace
 
 FROM scratch
 WORKDIR /workspace

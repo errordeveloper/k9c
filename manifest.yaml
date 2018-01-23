@@ -77,14 +77,14 @@ items:
           restartPolicy: Always
           initContainers:
             - name: "git-clone"
-              image: "errordeveloper/k9c@sha256:70bdb06a86213fb4af28f460219ad81ec71849a64ea4cfa11a10d572a9c222bb"
+              image: "errordeveloper/k9c@sha256:7c314df22297d6151aa7d54d1e0665a39e9bebaec3fd6a4d4a3153e709ab459e"
               command: [ "/bin/sh", "-c", "test -d /workspace/app || git clone https://github.com/bricef/metrics-demo" ]
               volumeMounts:
                 - name: workspace
                   mountPath: /workspace
           containers:
             - name: "ide"
-              image: "errordeveloper/k9c@sha256:70bdb06a86213fb4af28f460219ad81ec71849a64ea4cfa11a10d572a9c222bb"
+              image: "errordeveloper/k9c@sha256:7c314df22297d6151aa7d54d1e0665a39e9bebaec3fd6a4d4a3153e709ab459e"
               imagePullPolicy: IfNotPresent
               ports:
                 - name: http
@@ -92,7 +92,12 @@ items:
               volumeMounts:
                 - name: workspace
                   mountPath: /workspace
+                - name: dockersocket
+                  mountPath: /var/run/docker.sock
           volumes:
             - name: workspace
               persistentVolumeClaim:
                 claimName: workspace
+            - name: dockersocket
+              hostPath:
+                path: /var/run/docker.sock
