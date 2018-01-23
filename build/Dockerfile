@@ -59,8 +59,10 @@ RUN curl --silent --location 'https://get.docker.com/builds/Linux/x86_64/docker-
   | tar xz usr/local/bin/docker
 
 RUN mkdir -p /out/workspace
+COPY in-cluster-config.yaml /out/etc/
 
 FROM scratch
 WORKDIR /workspace
+ENV KUBECONFIG /etc/in-cluster-config.yaml
 ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "--auth", "username:password", "-w", "/workspace" ]
 COPY --from=build  /out /

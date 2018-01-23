@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Config
+clusters:
+  - name: k9c-cluster
+    cluster:
+      server: https://kubernetes.default.svc:443
+      certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+users:
+  - name: k9c-user
+    user:
+      tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+contexts:
+  - name: k9c-context
+    context:
+      cluster: k9c-cluster
+      user: k9c-user
+      namespace: workspace
+current-context: k9c-context

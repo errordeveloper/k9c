@@ -4,20 +4,24 @@ items:
   - apiVersion: v1
     kind: Namespace
     metadata:
-      name: "k9c"
+      name: k9c
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: workspace
   - apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: "ide"
-      namespace: "k9c"
+      name: ide
+      namespace: k9c
       labels:
-        name: "ide"
+        name: ide
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRole
     metadata:
-      name: "ide"
+      name: ide
       labels:
-        name: "ide"
+        name: ide
     rules:
       - apiGroups: [ '*' ]
         resources: [ '*' ]
@@ -27,33 +31,42 @@ items:
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRoleBinding
     metadata:
-      name: "ide"
-      namespace: "k9c"
+      name: ide
+      namespace: k9c
       labels:
-        name: "ide"
+        name: ide
     roleRef:
       kind: ClusterRole
       name: cluster-admin
       apiGroup: rbac.authorization.k8s.io
     subjects:
       - kind: ServiceAccount
-        name: "ide"
-        namespace: "k9c"
+        name: ide
+        namespace: k9c
   - apiVersion: v1
     kind: Service
     metadata:
-      name: "ide"
-      namespace: "k9c"
+      name: ide
+      namespace: k9c
       labels:
-        name: "ide"
+        name: ide
     spec:
-      type: LoadBalancer
+      type: NodePort # required for GCE ingress controller to work, but it's not accessible from the outside
       selector:
-        name: "ide"
+        name: ide
       ports:
       - name: http
         port: 80
         targetPort: 8080
+  - apiVersion: extensions/v1beta1
+    kind: Ingress
+    metadata:
+      name: ide
+      namespace: k9c
+    spec:
+      backend:
+        serviceName: ide
+        servicePort: http
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
@@ -67,28 +80,28 @@ items:
   - apiVersion: apps/v1beta1
     kind: Deployment
     metadata:
-      name: "ide"
-      namespace: "k9c"
+      name: ide
+      namespace: k9c
       labels:
-        name: "ide"
+        name: ide
     spec:
       template:
         metadata:
           labels:
-            name: "ide"
+            name: ide
         spec:
-          serviceAccount: "ide"
+          serviceAccount: ide
           restartPolicy: Always
           initContainers:
-            - name: "git-clone"
-              image: "errordeveloper/k9c@sha256:7c314df22297d6151aa7d54d1e0665a39e9bebaec3fd6a4d4a3153e709ab459e"
-              command: [ "/bin/sh", "-c", "test -d /workspace/app || git clone https://github.com/bricef/metrics-demo" ]
+            - name: git-clone
+              image: errordeveloper/k9c@sha256:ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
+              command: [ '/bin/sh', '-c', 'test -d /workspace/app || git clone https://github.com/bricef/metrics-demo' ]
               volumeMounts:
                 - name: workspace
                   mountPath: /workspace
           containers:
-            - name: "ide"
-              image: "errordeveloper/k9c@sha256:7c314df22297d6151aa7d54d1e0665a39e9bebaec3fd6a4d4a3153e709ab459e"
+            - name: ide
+              image: errordeveloper/k9c@sha256:ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
               imagePullPolicy: IfNotPresent
               ports:
                 - name: http
