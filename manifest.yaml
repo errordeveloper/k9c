@@ -1,14 +1,17 @@
 apiVersion: v1
 kind: List
 items:
+
   - apiVersion: v1
     kind: Namespace
     metadata:
       name: ide
+
   - apiVersion: v1
     kind: Namespace
     metadata:
       name: ide-workspace
+
   - apiVersion: v1
     kind: ServiceAccount
     metadata:
@@ -16,6 +19,7 @@ items:
       namespace: ide
       labels:
         name: ide
+
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRole
     metadata:
@@ -28,18 +32,6 @@ items:
         verbs: [ 'get', 'list', 'watch' ]
       - nonResourceURLs: [ '*' ]
         verbs: [ 'get', 'list', 'watch' ]
-  - apiVersion: rbac.authorization.k8s.io/v1beta1
-    kind: ClusterRole
-    metadata:
-      name: ide-workspace-admin
-      labels:
-        name: ide
-    rules:
-      - apiGroups: [ '*' ]
-        resources: [ '*' ]
-        verbs: [ '*' ]
-      - nonResourceURLs: [ '*' ]
-        verbs: [ '*' ]
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRoleBinding
     metadata:
@@ -54,6 +46,18 @@ items:
       - kind: ServiceAccount
         name: ide
         namespace: ide
+
+  - apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: Role
+    metadata:
+      name: ide-workspace-admin
+      namespace: ide-workspace
+      labels:
+        name: ide
+    rules:
+      - apiGroups: [ '*' ]
+        resources: [ '*' ]
+        verbs: [ '*' ]
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: RoleBinding
     metadata:
@@ -62,13 +66,14 @@ items:
       labels:
         name: ide
     roleRef:
-      kind: ClusterRole
+      kind: Role
       name: ide-workspace-admin
       apiGroup: rbac.authorization.k8s.io
     subjects:
       - kind: ServiceAccount
         name: ide
         namespace: ide
+
   - apiVersion: v1
     kind: Service
     metadata:
@@ -110,6 +115,7 @@ items:
                   ## todo use ide-workspace namespaces
                   serviceName: metrics-demo
                   servicePort: http
+
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
@@ -120,6 +126,7 @@ items:
       resources:
         requests:
           storage: 2Gi
+
   - apiVersion: apps/v1beta1
     kind: Deployment
     metadata:
