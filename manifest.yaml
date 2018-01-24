@@ -4,22 +4,34 @@ items:
   - apiVersion: v1
     kind: Namespace
     metadata:
-      name: k9c
+      name: ide
   - apiVersion: v1
     kind: Namespace
     metadata:
-      name: workspace
+      name: ide-workspace
   - apiVersion: v1
     kind: ServiceAccount
     metadata:
       name: ide
-      namespace: k9c
+      namespace: ide
       labels:
         name: ide
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRole
     metadata:
-      name: ide
+      name: ide-cluster-view
+      labels:
+        name: ide
+    rules:
+      - apiGroups: [ '*' ]
+        resources: [ '*' ]
+        verbs: [ 'get', 'list', 'watch' ]
+      - nonResourceURLs: [ '*' ]
+        verbs: [ 'get', 'list', 'watch' ]
+  - apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRole
+    metadata:
+      name: ide-workspace-admin
       labels:
         name: ide
     rules:
@@ -31,23 +43,37 @@ items:
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRoleBinding
     metadata:
-      name: ide
-      namespace: k9c
+      name: ide-cluster-view
       labels:
         name: ide
     roleRef:
       kind: ClusterRole
-      name: cluster-admin
+      name: ide-cluster-view
       apiGroup: rbac.authorization.k8s.io
     subjects:
       - kind: ServiceAccount
         name: ide
-        namespace: k9c
+        namespace: ide
+  - apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: RoleBinding
+    metadata:
+      name: ide-workspace-admin
+      namespace: ide-workspace
+      labels:
+        name: ide
+    roleRef:
+      kind: ClusterRole
+      name: ide-workspace-admin
+      apiGroup: rbac.authorization.k8s.io
+    subjects:
+      - kind: ServiceAccount
+        name: ide
+        namespace: ide
   - apiVersion: v1
     kind: Service
     metadata:
       name: ide
-      namespace: k9c
+      namespace: ide
       labels:
         name: ide
     spec:
@@ -61,7 +87,7 @@ items:
     kind: Ingress
     metadata:
       name: ide
-      namespace: k9c
+      namespace: ide
       annotations:
         kubernetes.io/ingress.class: "traefik"
         traefik.frontend.passHostHeader: "false"
@@ -81,13 +107,14 @@ items:
                   servicePort: http
               - path: /app/metrics-demo
                 backend:
+                  ## todo use ide-workspace namespaces
                   serviceName: metrics-demo
                   servicePort: http
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
-      name: workspace
-      namespace: k9c
+      name: ide-workspace-data
+      namespace: ide
     spec:
       accessModes: [ReadWriteOnce]
       resources:
@@ -97,7 +124,7 @@ items:
     kind: Deployment
     metadata:
       name: ide
-      namespace: k9c
+      namespace: ide
       labels:
         name: ide
     spec:
@@ -114,7 +141,7 @@ items:
               image: errordeveloper/k9c@sha256:ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
               command: [ '/bin/sh', '-c', 'test -d /workspace/app || git clone https://github.com/bricef/metrics-demo' ]
               volumeMounts:
-                - name: workspace
+                - name: ide-workspace-data
                   mountPath: /workspace
           containers:
             - name: ide
@@ -142,14 +169,14 @@ items:
                 initialDelaySeconds: 5
                 periodSeconds: 1
               volumeMounts:
-                - name: workspace
+                - name: ide-workspace-data
                   mountPath: /workspace
                 - name: dockersocket
                   mountPath: /var/run/docker.sock
           volumes:
-            - name: workspace
+            - name: ide-workspace-data
               persistentVolumeClaim:
-                claimName: workspace
+                claimName: ide-workspace-data
             - name: dockersocket
               hostPath:
                 path: /var/run/docker.sock
