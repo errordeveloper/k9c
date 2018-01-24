@@ -91,6 +91,8 @@ items:
     metadata:
       name: traefik
       namespace: kube-system
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: test-1.training.weave.works.
     spec:
       selector:
         k8s-app: traefik-ingress-lb
