@@ -1,0 +1,146 @@
+apiVersion: v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    creationTimestamp: null
+    name: traefik-ingress-controller
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - services
+    - endpoints
+    - secrets
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - extensions
+    resources:
+    - ingresses
+    verbs:
+    - get
+    - list
+    - watch
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    creationTimestamp: null
+    name: traefik-ingress-controller
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: traefik-ingress-controller
+  subjects:
+  - kind: ServiceAccount
+    name: traefik-ingress-controller
+    namespace: kube-system
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: null
+    name: traefik-ingress-controller
+    namespace: kube-system
+- apiVersion: apps/v1beta2
+  kind: DaemonSet
+  metadata:
+    annotations:
+      deprecated.daemonset.template.generation: "0"
+    creationTimestamp: null
+    labels:
+      k8s-app: traefik-ingress-lb
+    name: traefik-ingress-controller
+    namespace: kube-system
+  spec:
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          k8s-app: traefik-ingress-lb
+          name: traefik-ingress-lb
+      spec:
+        containers:
+        - args:
+          - -d
+          - --web
+          - --kubernetes
+          image: traefik
+          imagePullPolicy: Always
+          name: traefik-ingress-lb
+          ports:
+          - containerPort: 80
+            hostPort: 80
+            name: http
+            protocol: TCP
+          - containerPort: 8080
+            hostPort: 8080
+            name: admin
+            protocol: TCP
+          resources: {}
+          securityContext:
+            privileged: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        hostNetwork: true
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: traefik-ingress-controller
+        serviceAccountName: traefik-ingress-controller
+        terminationGracePeriodSeconds: 60
+    updateStrategy:
+      type: OnDelete
+  status:
+    currentNumberScheduled: 0
+    desiredNumberScheduled: 0
+    numberMisscheduled: 0
+    numberReady: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: traefik-admin
+    namespace: kube-system
+  spec:
+    ports:
+    - name: admin
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      k8s-app: traefik-ingress-lb
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: test1.training.example.com.
+    creationTimestamp: null
+    name: traefik
+    namespace: kube-system
+  spec:
+    externalTrafficPolicy: Cluster
+    ports:
+    - name: web
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      k8s-app: traefik-ingress-lb
+    sessionAffinity: None
+    type: LoadBalancer
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}

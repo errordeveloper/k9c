@@ -7,8 +7,9 @@ so all attendees need is a browser.
 
 Deploy it to a GKE cluster (or other provider with functional storage and external load balancers):
 ```
-kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/traefik.yaml
-kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/manifest.yaml
+kubectl create namespaces ide ide-workspace
+kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/manifests/ide.yaml
+kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/manifests/traefik.yaml
 ```
 
 Get exteral IP:
