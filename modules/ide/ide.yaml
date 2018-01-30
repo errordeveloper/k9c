@@ -16,7 +16,7 @@ Parameters:
     Default: errordeveloper/k9c
   - Name: images/ide-digest
     Type: String
-    Default: ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
+    Default: a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
 
   - Name: workspace/repo-url
     Type: String
@@ -42,8 +42,6 @@ Deployments:
 
   - name: ide
     namespace: {kubegen.String.Lookup: namespaces/ide}
-    ## TODO repo and auth params
-    ## TODO auth in probes will need `kubegen.String.ToBASE64`
     replicas: 1
     sericeAccount: ide
     initContainers:
@@ -65,6 +63,9 @@ Deployments:
     containers:
       - name: ide
         image: {kubegen.Object.Lookup: internals/images/ide-name}
+        args:
+          - "--auth"
+          - {kubegen.Object.Lookup: internals/auth}
         ports:
           - name: http
             containerPort: 8080
@@ -107,6 +108,14 @@ Internals:
         - '@sha256:'
         - kubegen.String.Lookup: images/ide-digest
 
+  - Name: internals/auth
+    Type: Object
+    Value:
+      kubegen.String.Join:
+        - kubegen.String.Lookup: username
+        - ':'
+        - kubegen.String.Lookup: password
+
   - Name: internals/probes/with-auth
     Type: Object
     Value:
@@ -117,10 +126,7 @@ Internals:
             kubegen.String.Join:
               - 'Basic '
               - kubegen.String.AsBASE64:
-                  kubegen.String.Join:
-                    - kubegen.String.Lookup: username
-                    - ':'
-                    - kubegen.String.Lookup: password
+                  kubegen.Object.Lookup: internals/auth
 
 Resources:
   - path: include/rbac.yaml

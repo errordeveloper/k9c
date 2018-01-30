@@ -27,7 +27,10 @@ items:
           name: ide
       spec:
         containers:
-        - image: errordeveloper/k9c@sha256:ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
+        - args:
+          - --auth
+          - username:password
+          image: errordeveloper/k9c@sha256:a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -75,7 +78,7 @@ items:
           - -c
           - test -d /workspace/demo-app || git clone https://github.com/bricef/metrics-demo
             demo-app
-          image: errordeveloper/k9c@sha256:ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
+          image: errordeveloper/k9c@sha256:a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
           imagePullPolicy: IfNotPresent
           name: git-clone
           resources: {}
