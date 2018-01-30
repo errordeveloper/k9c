@@ -1,0 +1,128 @@
+Kind: kubegen.k8s.io/Module.v1alpha2
+
+Parameters:
+
+  - Name: username
+    Type: String
+    Default: username
+  - Name: password
+    Type: String
+    Default: password
+
+  ## Extenrnal parameters for image basename and digest, there is an internal
+  ## one also that uses a macro to join these into one string
+  - Name: images/ide-basename
+    Type: String
+    Default: errordeveloper/k9c
+  - Name: images/ide-digest
+    Type: String
+    Default: ad69086ac28b91c745ecd8be2d21e1f1630d81c9eeb6967338c9f73794780475
+
+  - Name: workspace/repo-url
+    Type: String
+    Default: https://github.com/bricef/metrics-demo
+  - Name: workspace/repo-checkout-path
+    Type: String
+    Default: demo-app
+
+  ## As plain resources do not allow us to override namespace
+  ## we have namespaces set here
+  - Name: namespaces/ide
+    Type: String
+    Default: ide
+  - Name: namespaces/workspace
+    Type: String
+    Default: ide-workspace
+
+  - Name: ingress/class
+    Type: String
+    Default: traefik
+
+Deployments:
+
+  - name: ide
+    namespace: {kubegen.String.Lookup: namespaces/ide}
+    ## TODO repo and auth params
+    ## TODO auth in probes will need `kubegen.String.ToBASE64`
+    replicas: 1
+    sericeAccount: ide
+    initContainers:
+      - name: git-clone
+        image: {kubegen.Object.Lookup: internals/images/ide-name}
+        command:
+          - '/bin/sh'
+          - '-c'
+          - kubegen.String.Join:
+            - 'test -d /workspace/'
+            - {kubegen.String.Lookup: 'workspace/repo-checkout-path'}
+            - ' || git clone '
+            - {kubegen.String.Lookup: 'workspace/repo-url'}
+            - ' '
+            - {kubegen.String.Lookup: 'workspace/repo-checkout-path'}
+        volumeMounts:
+          - name: ide-workspace-data
+            mountPath: /workspace
+    containers:
+      - name: ide
+        image: {kubegen.Object.Lookup: internals/images/ide-name}
+        ports:
+          - name: http
+            containerPort: 8080
+        livenessProbe:
+          kubegen.Object.Lookup: internals/probes/with-auth
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        readinessProbe:
+          kubegen.Object.Lookup: internals/probes/with-auth
+          initialDelaySeconds: 5
+          periodSeconds: 1
+        volumeMounts:
+          - name: ide-workspace-data
+            mountPath: /workspace
+          - name: dockersocket
+            mountPath: /var/run/docker.sock
+    volumes:
+      - name: ide-workspace-data
+        persistentVolumeClaim:
+          claimName: ide-workspace-data
+      - name: dockersocket
+        hostPath:
+          path: /var/run/docker.sock
+
+Services:
+
+  - name: ide
+    namespace: {kubegen.String.Lookup: namespaces/ide}
+    ports:
+      - name: http
+        port: 80
+
+Internals:
+
+  - Name: internals/images/ide-name
+    Type: Object
+    Value:
+      kubegen.String.Join:
+        - kubegen.String.Lookup: images/ide-basename
+        - '@sha256:'
+        - kubegen.String.Lookup: images/ide-digest
+
+  - Name: internals/probes/with-auth
+    Type: Object
+    Value:
+      httpGet:
+        path: /ide.html
+        httpHeaders:
+          Authorization:
+            kubegen.String.Join:
+              - 'Basic '
+              - kubegen.String.AsBASE64:
+                  kubegen.String.Join:
+                    - kubegen.String.Lookup: username
+                    - ':'
+                    - kubegen.String.Lookup: password
+
+Resources:
+  - path: include/rbac.yaml
+  - path: include/pv.yaml
+  - path: include/ingress.yaml
