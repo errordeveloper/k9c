@@ -1,0 +1,636 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "annotations": {
+          "cloud.weave.works/version": "v1.0.0-13-gc299a8e"
+        },
+        "name": "weave"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ServiceAccount",
+      "metadata": {
+        "labels": {
+          "name": "weave-flux"
+        },
+        "name": "weave-flux",
+        "namespace": "weave"
+      }
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+      "kind": "ClusterRole",
+      "metadata": {
+        "labels": {
+          "name": "weave-flux"
+        },
+        "name": "weave-flux",
+        "namespace": "weave"
+      },
+      "rules": [
+        {
+          "apiGroups": [
+            "*"
+          ],
+          "resources": [
+            "*"
+          ],
+          "verbs": [
+            "*"
+          ]
+        },
+        {
+          "nonResourceURLs": [
+            "*"
+          ],
+          "verbs": [
+            "*"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+      "kind": "ClusterRoleBinding",
+      "metadata": {
+        "labels": {
+          "name": "weave-flux"
+        },
+        "name": "weave-flux",
+        "namespace": "weave"
+      },
+      "roleRef": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "ClusterRole",
+        "name": "weave-flux"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "weave-flux",
+          "namespace": "weave"
+        }
+      ]
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "metadata": {
+        "name": "flux-git-deploy",
+        "namespace": "weave"
+      },
+      "type": "Opaque"
+    },
+    {
+      "apiVersion": "apps/v1beta1",
+      "kind": "Deployment",
+      "metadata": {
+        "labels": {
+          "app": "weave-flux",
+          "name": "weave-flux-memcached",
+          "weave-cloud-component": "flux",
+          "weave-flux-component": "memcached"
+        },
+        "name": "weave-flux-memcached",
+        "namespace": "weave"
+      },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "metadata": {
+            "annotations": {
+              "prometheus.io.scrape": "false"
+            },
+            "labels": {
+              "app": "weave-flux",
+              "name": "weave-flux-memcached",
+              "weave-cloud-component": "flux",
+              "weave-flux-component": "memcached"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "args": [
+                  "-m 64",
+                  "-p 11211"
+                ],
+                "image": "memcached:1.4.39-alpine",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "memcached",
+                "ports": [
+                  {
+                    "containerPort": 11211,
+                    "name": "clients"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "labels": {
+          "app": "weave-flux",
+          "name": "weave-flux-memcached",
+          "weave-cloud-component": "flux",
+          "weave-flux-component": "memcached"
+        },
+        "name": "weave-flux-memcached",
+        "namespace": "weave"
+      },
+      "spec": {
+        "clusterIP": "None",
+        "ports": [
+          {
+            "name": "memcached",
+            "port": 11211
+          }
+        ],
+        "selector": {
+          "app": "weave-flux",
+          "name": "weave-flux-memcached",
+          "weave-cloud-component": "flux",
+          "weave-flux-component": "memcached"
+        }
+      }
+    },
+    {
+      "apiVersion": "apps/v1beta1",
+      "kind": "Deployment",
+      "metadata": {
+        "labels": {
+          "app": "weave-flux",
+          "name": "weave-flux-agent",
+          "weave-cloud-component": "flux",
+          "weave-flux-component": "agent"
+        },
+        "name": "weave-flux-agent",
+        "namespace": "weave"
+      },
+      "spec": {
+        "replicas": 1,
+        "strategy": {
+          "type": "Recreate"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "weave-flux",
+              "name": "weave-flux-agent",
+              "weave-cloud-component": "flux",
+              "weave-flux-component": "agent"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "args": [
+                  {
+                    "kubegen.String.Join": [
+                      "--token=",
+                      {
+                        "kubegen.String.Lookup": "service-token"
+                      }
+                    ]
+                  },
+                  "--connect=wss://cloud.weave.works./api/flux",
+                  "--memcached-hostname=weave-flux-memcached.weave.svc.cluster.local"
+                ],
+                "image": "quay.io/weaveworks/flux:1.2.1",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/etc/fluxd/ssh",
+                    "name": "git-key"
+                  }
+                ]
+              }
+            ],
+            "serviceAccountName": "weave-flux",
+            "volumes": [
+              {
+                "name": "git-key",
+                "secret": {
+                  "secretName": "flux-git-deploy"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ServiceAccount",
+      "metadata": {
+        "labels": {
+          "name": "weave-scope"
+        },
+        "name": "weave-scope",
+        "namespace": "weave"
+      }
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+      "kind": "ClusterRole",
+      "metadata": {
+        "labels": {
+          "name": "weave-scope"
+        },
+        "name": "weave-scope",
+        "namespace": "weave"
+      },
+      "rules": [
+        {
+          "apiGroups": [
+            "*"
+          ],
+          "resources": [
+            "*"
+          ],
+          "verbs": [
+            "*"
+          ]
+        },
+        {
+          "nonResourceURLs": [
+            "*"
+          ],
+          "verbs": [
+            "*"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+      "kind": "ClusterRoleBinding",
+      "metadata": {
+        "labels": {
+          "name": "weave-scope"
+        },
+        "name": "weave-scope",
+        "namespace": "weave"
+      },
+      "roleRef": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "ClusterRole",
+        "name": "weave-scope"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "weave-scope",
+          "namespace": "weave"
+        }
+      ]
+    },
+    {
+      "apiVersion": "extensions/v1beta1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "labels": {
+          "app": "weave-scope",
+          "name": "weave-scope-agent",
+          "weave-cloud-component": "scope",
+          "weave-scope-component": "agent"
+        },
+        "name": "weave-scope-agent",
+        "namespace": "weave"
+      },
+      "spec": {
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "weave-scope",
+              "name": "weave-scope-agent",
+              "weave-cloud-component": "scope",
+              "weave-scope-component": "agent"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "args": [
+                  "--no-app",
+                  "--probe.docker.bridge=docker0",
+                  "--probe.docker=true",
+                  "--probe.kubernetes=true",
+                  {
+                    "kubegen.String.Join": [
+                      "https://",
+                      {
+                        "kubegen.String.Lookup": "service-token"
+                      },
+                      "cloud.weave.works"
+                    ]
+                  }
+                ],
+                "image": "weaveworks/scope:1.7.1",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "securityContext": {
+                  "privileged": true
+                },
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/run/docker.sock",
+                    "name": "docker-socket"
+                  },
+                  {
+                    "mountPath": "/var/run/scope/plugins",
+                    "name": "scope-plugins"
+                  },
+                  {
+                    "mountPath": "/sys/kernel/debug",
+                    "name": "sys-kernel-debug"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirstWithHostNet",
+            "hostNetwork": true,
+            "hostPID": true,
+            "serviceAccountName": "weave-scope",
+            "tolerations": [
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/run/docker.sock"
+                },
+                "name": "docker-socket"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/run/scope/plugins"
+                },
+                "name": "scope-plugins"
+              },
+              {
+                "hostPath": {
+                  "path": "/sys/kernel/debug"
+                },
+                "name": "sys-kernel-debug"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "type": "RollingUpdate"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ServiceAccount",
+      "metadata": {
+        "labels": {
+          "name": "weave-cortex"
+        },
+        "name": "weave-cortex",
+        "namespace": "weave"
+      }
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+      "kind": "ClusterRole",
+      "metadata": {
+        "labels": {
+          "name": "weave-cortex"
+        },
+        "name": "weave-cortex",
+        "namespace": "weave"
+      },
+      "rules": [
+        {
+          "apiGroups": [
+            "*"
+          ],
+          "resources": [
+            "*"
+          ],
+          "verbs": [
+            "*"
+          ]
+        },
+        {
+          "nonResourceURLs": [
+            "*"
+          ],
+          "verbs": [
+            "*"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+      "kind": "ClusterRoleBinding",
+      "metadata": {
+        "labels": {
+          "name": "weave-cortex"
+        },
+        "name": "weave-cortex",
+        "namespace": "weave"
+      },
+      "roleRef": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "ClusterRole",
+        "name": "weave-cortex"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "weave-cortex",
+          "namespace": "weave"
+        }
+      ]
+    },
+    {
+      "apiVersion": "apps/v1beta1",
+      "kind": "Deployment",
+      "metadata": {
+        "labels": {
+          "app": "weave-cortex",
+          "name": "prometheus",
+          "weave-cloud-component": "cortex",
+          "weave-cortex-component": "agent"
+        },
+        "name": "prometheus",
+        "namespace": "weave"
+      },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "metadata": {
+            "annotations": {
+              "prometheus.io.scrape": "true"
+            },
+            "labels": {
+              "app": "weave-cortex",
+              "name": "prometheus",
+              "weave-cloud-component": "cortex",
+              "weave-cortex-component": "agent"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "args": [
+                  "-config.file=/etc/prometheus/prometheus.yml",
+                  "-web.listen-address=:8080",
+                  "-storage.local.engine=none"
+                ],
+                "image": "prom/prometheus:v1.8.2",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "mountPath": "/etc/prometheus",
+                    "name": "agent-config-volume"
+                  }
+                ]
+              }
+            ],
+            "serviceAccountName": "weave-cortex",
+            "volumes": [
+              {
+                "configMap": {
+                  "name": "weave-cortex-agent-config"
+                },
+                "name": "agent-config-volume"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "extensions/v1beta1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "labels": {
+          "app": "weave-cortex",
+          "name": "prom-node-exporter",
+          "weave-cloud-component": "cortex",
+          "weave-cortex-component": "node-exporter"
+        },
+        "name": "prom-node-exporter",
+        "namespace": "weave"
+      },
+      "spec": {
+        "template": {
+          "metadata": {
+            "annotations": {
+              "prometheus.io.scrape": "true"
+            },
+            "labels": {
+              "app": "weave-cortex",
+              "name": "prom-node-exporter",
+              "weave-cloud-component": "cortex",
+              "weave-cortex-component": "node-exporter"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "image": "prom/node-exporter:v0.14.0",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "ports": [
+                  {
+                    "containerPort": 9100,
+                    "protocol": "TCP"
+                  }
+                ],
+                "securityContext": {
+                  "privileged": true
+                }
+              }
+            ],
+            "hostNetwork": true,
+            "hostPID": true,
+            "serviceAccountName": "weave-cortex",
+            "tolerations": [
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "type": "RollingUpdate"
+        }
+      }
+    },
+    {
+      "apiVersion": "apps/v1beta1",
+      "kind": "Deployment",
+      "metadata": {
+        "labels": {
+          "app": "weave-cortex",
+          "name": "kube-state-metrics",
+          "weave-cloud-component": "cortex",
+          "weave-cortex-component": "state-metrics"
+        },
+        "name": "kube-state-metrics",
+        "namespace": "weave"
+      },
+      "spec": {
+        "replicas": 1,
+        "template": {
+          "metadata": {
+            "annotations": {
+              "prometheus.io.scrape": "true"
+            },
+            "labels": {
+              "app": "weave-cortex",
+              "name": "kube-state-metrics",
+              "weave-cloud-component": "cortex",
+              "weave-cortex-component": "state-metrics"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "image": "quay.io/coreos/kube-state-metrics:v1.2.0",
+                "name": "kube-state-metrics",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "name": "metrics"
+                  }
+                ]
+              }
+            ],
+            "serviceAccountName": "weave-cortex"
+          }
+        }
+      }
+    }
+  ],
+  "kind": "List"
+}
