@@ -64,5 +64,5 @@ COPY in-cluster-config.yaml /out/etc/
 FROM scratch
 WORKDIR /workspace
 ENV KUBECONFIG /etc/in-cluster-config.yaml
-ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "--auth", "username:password", "-w", "/workspace" ]
+ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "-w", "/workspace" ]
 COPY --from=build  /out /

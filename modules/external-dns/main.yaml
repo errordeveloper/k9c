@@ -1,0 +1,14 @@
+Kind: kubegen.k8s.io/Module.v1alpha2
+
+Parameters:
+
+  - Name: external-dns/zone
+    Type: String
+    Required: true
+
+  - Name: external-dns/google-project
+    Type: String
+    Required: true
+
+Resources:
+  - path: include/external-dns.yaml

@@ -1,0 +1,258 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1beta1
+  kind: Deployment
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide
+    namespace: ide
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        name: ide
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          name: ide
+      spec:
+        containers:
+        - args:
+          - --auth
+          - username:password
+          image: errordeveloper/k9c@sha256:a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Authorization
+                value: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+              path: /ide.html
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: ide
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Authorization
+                value: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+              path: /ide.html
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /workspace
+            name: ide-workspace-data
+          - mountPath: /var/run/docker.sock
+            name: dockersocket
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - /bin/sh
+          - -c
+          - test -d /workspace/demo-app || git clone https://github.com/bricef/metrics-demo
+            demo-app
+          image: errordeveloper/k9c@sha256:a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
+          imagePullPolicy: IfNotPresent
+          name: git-clone
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /workspace
+            name: ide-workspace-data
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: ide-workspace-data
+          persistentVolumeClaim:
+            claimName: ide-workspace-data
+        - hostPath:
+            path: /var/run/docker.sock
+            type: ""
+          name: dockersocket
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide
+    namespace: ide
+  spec:
+    ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+    selector:
+      name: ide
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    creationTimestamp: null
+    name: ide
+  spec: {}
+  status:
+    phase: Active
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide
+    namespace: ide
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide-cluster-view
+  rules:
+  - apiGroups:
+    - '*'
+    resources:
+    - '*'
+    verbs:
+    - get
+    - list
+    - watch
+  - nonResourceURLs:
+    - '*'
+    verbs:
+    - get
+    - list
+    - watch
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide-cluster-view
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: ide-cluster-view
+  subjects:
+  - kind: ServiceAccount
+    name: ide
+    namespace: ide
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    creationTimestamp: null
+    name: ide-workspace
+  spec: {}
+  status:
+    phase: Active
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide-workspace-workspace-admin
+    namespace: ide-workspace
+  rules:
+  - apiGroups:
+    - '*'
+    resources:
+    - '*'
+    verbs:
+    - '*'
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide-workspace-workspace-admin
+    namespace: ide-workspace
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: ide-workspace-workspace-admin
+  subjects:
+  - kind: ServiceAccount
+    name: ide
+    namespace: ide
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: ide
+    name: ide-workspace-data
+    namespace: ide
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2Gi
+  status:
+    phase: Pending
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.frontend.passHostHeader: "false"
+    creationTimestamp: null
+    name: ide
+    namespace: ide
+  spec:
+    backend:
+      serviceName: ide
+      servicePort: http
+    rules:
+    - http:
+        paths:
+        - backend:
+            serviceName: ide
+            servicePort: http
+          path: /
+        - backend:
+            serviceName: metrics-demo
+            servicePort: http
+          path: /app/metrics-demo
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}

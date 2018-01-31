@@ -92,7 +92,7 @@ items:
       name: traefik
       namespace: kube-system
       annotations:
-        external-dns.alpha.kubernetes.io/hostname: test-1.training.weave.works.
+        external-dns.alpha.kubernetes.io/hostname: {kubegen.String.Lookup: external-dns/domain}
     spec:
       selector:
         k8s-app: traefik-ingress-lb

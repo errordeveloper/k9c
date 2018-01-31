@@ -1,0 +1,10 @@
+Kind: kubegen.k8s.io/Module.v1alpha2
+
+Parameters:
+
+  - Name: service-token
+    Type: String
+    Required: true
+
+Resources:
+  - path: include/weave-cloud.json

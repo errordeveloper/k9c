@@ -1,0 +1,10 @@
+Kind: kubegen.k8s.io/Module.v1alpha2
+
+Parameters:
+
+  - Name: external-dns/domain
+    Type: String
+    Default: test1.training.example.com.
+
+Resources:
+  - path: include/traefik.yaml
