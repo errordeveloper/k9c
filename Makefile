@@ -8,4 +8,4 @@ generate_public_manifests: ide.yaml traefik.yaml
 
 %.yaml:
 	./kubegen module ./modules/$$(basename $@ .yaml) -s \
-	  | ~/Code/kubernetes/bin/kubectl convert -f - > manifests/$@
+	  | /usr/local/bin/kubectl convert -f - > manifests/$@

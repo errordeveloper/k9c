@@ -43,7 +43,7 @@ Deployments:
   - name: ide
     namespace: {kubegen.String.Lookup: namespaces/ide}
     replicas: 1
-    sericeAccount: ide
+    serviceAccountName: ide
     initContainers:
       - name: git-clone
         image: {kubegen.Object.Lookup: internals/images/ide-name}
