@@ -14,5 +14,5 @@ contexts:
     context:
       cluster: k9c-cluster
       user: k9c-user
-      namespace: workspace
+      namespace: ide-workspace
 current-context: k9c-context
