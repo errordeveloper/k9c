@@ -30,7 +30,7 @@ items:
         - args:
           - --auth
           - username:password
-          image: errordeveloper/k9c@sha256:a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
+          image: errordeveloper/k9c@sha256:74afb6e7b76fb9895f86f13daf4909c094f3edee756b325b88a8ea417775a01a
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -78,7 +78,7 @@ items:
           - -c
           - test -d /workspace/demo-app || git clone https://github.com/bricef/metrics-demo
             demo-app
-          image: errordeveloper/k9c@sha256:a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
+          image: errordeveloper/k9c@sha256:74afb6e7b76fb9895f86f13daf4909c094f3edee756b325b88a8ea417775a01a
           imagePullPolicy: IfNotPresent
           name: git-clone
           resources: {}

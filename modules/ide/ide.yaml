@@ -16,7 +16,7 @@ Parameters:
     Default: errordeveloper/k9c
   - Name: images/ide-digest
     Type: String
-    Default: a414a3a45021938daa01acbfb1ab0d29be9fdb6bab439a3cf7e0f1afe056d11f
+    Default: 74afb6e7b76fb9895f86f13daf4909c094f3edee756b325b88a8ea417775a01a
 
   - Name: workspace/repo-url
     Type: String
