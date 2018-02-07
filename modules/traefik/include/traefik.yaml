@@ -59,7 +59,7 @@ items:
           terminationGracePeriodSeconds: 60
           hostNetwork: true
           containers:
-          - image: traefik
+          - image: traefik:v1.5.1
             name: traefik-ingress-lb
             ports:
             - name: http
