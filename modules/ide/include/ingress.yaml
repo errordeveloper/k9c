@@ -1,27 +1,55 @@
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: ide
-  namespace: {kubegen.String.Lookup: namespaces/ide}
-  annotations:
-    kubernetes.io/ingress.class: {kubegen.String.Lookup: ingress/class}
-    traefik.frontend.passHostHeader: "false"
-spec:
-  backend:
-    serviceName: ide
-    servicePort: http
-  # TODO we can actually setup DNS and TLS with Let's Encrypt and external DNS
-  # https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/gke.md
-  # and use training.weave.works. DNS zone
-  rules:
-    - http:
-        paths:
-          - path: /
-            backend:
-              serviceName: ide
-              servicePort: http
+kind: List
+apiVersion: v1
+items:
+
+  - apiVersion: extensions/v1beta1
+    kind: Ingress
+    metadata:
+      name: ide
+      namespace: {kubegen.String.Lookup: namespaces/ide}
+      annotations:
+        kubernetes.io/ingress.class: {kubegen.String.Lookup: ingress/class}
+    spec:
+      # TODO we can actually setup DNS and TLS with Let's Encrypt and external DNS
+      # https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/gke.md
+      # and use training.weave.works. DNS zone
+      rules:
+        - http:
+            paths:
+              - path: /
+                backend:
+                  serviceName: ide
+                  servicePort: http
+
+  - apiVersion: extensions/v1beta1
+    kind: Ingress
+    metadata:
+      name: metrics-demo
+      namespace: {kubegen.String.Lookup: namespaces/workspace}
+      annotations:
+        kubernetes.io/ingress.class: {kubegen.String.Lookup: ingress/class}
+    spec:
+      rules:
+      - http:
+          paths:
           - path: /app/metrics-demo
             backend:
-              ## TODO use ide-workspace namespaces
               serviceName: metrics-demo
               servicePort: http
+
+  - apiVersion: extensions/v1beta1
+    kind: Ingress
+    metadata:
+      name: prometheus
+      namespace: weave
+      annotations:
+        kubernetes.io/ingress.class: {kubegen.String.Lookup: ingress/class}
+    spec:
+      rules:
+      - http:
+          paths:
+          - path: /prometheus
+            backend:
+              serviceName: prometheus
+              servicePort: prometheus
+
