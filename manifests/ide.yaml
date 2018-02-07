@@ -235,14 +235,10 @@ items:
   metadata:
     annotations:
       kubernetes.io/ingress.class: traefik
-      traefik.frontend.passHostHeader: "false"
     creationTimestamp: null
     name: ide
     namespace: ide
   spec:
-    backend:
-      serviceName: ide
-      servicePort: http
     rules:
     - http:
         paths:
@@ -250,10 +246,42 @@ items:
             serviceName: ide
             servicePort: http
           path: /
+  status:
+    loadBalancer: {}
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    annotations:
+      kubernetes.io/ingress.class: traefik
+    creationTimestamp: null
+    name: metrics-demo
+    namespace: ide-workspace
+  spec:
+    rules:
+    - http:
+        paths:
         - backend:
             serviceName: metrics-demo
             servicePort: http
           path: /app/metrics-demo
+  status:
+    loadBalancer: {}
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    annotations:
+      kubernetes.io/ingress.class: traefik
+    creationTimestamp: null
+    name: prometheus
+    namespace: weave
+  spec:
+    rules:
+    - http:
+        paths:
+        - backend:
+            serviceName: prometheus
+            servicePort: prometheus
+          path: /prometheus
   status:
     loadBalancer: {}
 kind: List

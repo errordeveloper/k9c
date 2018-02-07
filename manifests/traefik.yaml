@@ -71,8 +71,8 @@ items:
           - -d
           - --web
           - --kubernetes
-          image: traefik
-          imagePullPolicy: Always
+          image: traefik:v1.5.1
+          imagePullPolicy: IfNotPresent
           name: traefik-ingress-lb
           ports:
           - containerPort: 80
