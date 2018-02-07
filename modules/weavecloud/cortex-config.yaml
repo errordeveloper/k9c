@@ -20,10 +20,6 @@ ConfigMaps:
                 password: {kubegen.String.Lookup: service-token}
               queue_config:
                 max_samples_per_send: 1000
-          remote_read:
-            - url: 'https://cloud.weave.works/api/prom/read'
-              basic_auth:
-                password: {kubegen.String.Lookup: service-token}
           scrape_configs:
             - job_name: kubernetes-apiservers
               kubernetes_sd_configs:
