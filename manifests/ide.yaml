@@ -227,7 +227,7 @@ items:
     - ReadWriteOnce
     resources:
       requests:
-        storage: 2Gi
+        storage: 1Gi
   status:
     phase: Pending
 - apiVersion: extensions/v1beta1
