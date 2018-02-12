@@ -5,7 +5,6 @@ weavecloud/include/weave-cloud.json:
 	curl --silent --location \
 	  "https://cloud.weave.works/k8s/v1.8/weave-cloud.json?service-token=DummyToken&omit-support-info=true" \
 	  | jq -S "" \
-	  | jq '.items[7].spec.template.spec.containers[0].args[0]={ "kubegen.String.Join": [ "--token=", { "kubegen.String.Lookup": "service-token" } ] }' \
-	  | jq '.items[11].spec.template.spec.containers[0].args[4]={ "kubegen.String.Join": [ "https://", { "kubegen.String.Lookup": "service-token" }, "cloud.weave.works" ] }' \
-	  | jq 'del(.items[18])' \
+	  | jq '.items[1].data.token={ "kubegen.String.AsBASE64": { "kubegen.String.Lookup": "service-token" } }' \
+	  | jq 'del(.items[19])' \
 	  > "$@"

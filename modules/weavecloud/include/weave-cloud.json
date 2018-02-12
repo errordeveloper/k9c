@@ -6,10 +6,26 @@
       "kind": "Namespace",
       "metadata": {
         "annotations": {
-          "cloud.weave.works/version": "v1.0.0-13-gc299a8e"
+          "cloud.weave.works/version": "v1.0.0-29-g7a77bbb"
         },
         "name": "weave"
       }
+    },
+    {
+      "apiVersion": "v1",
+      "data": {
+        "token": {
+          "kubegen.String.AsBASE64": {
+            "kubegen.String.Lookup": "service-token"
+          }
+        }
+      },
+      "kind": "Secret",
+      "metadata": {
+        "name": "weave-cloud",
+        "namespace": "weave"
+      },
+      "type": "Opaque"
     },
     {
       "apiVersion": "v1",
@@ -101,6 +117,7 @@
       },
       "spec": {
         "replicas": 1,
+        "revisionHistoryLimit": 2,
         "template": {
           "metadata": {
             "annotations": {
@@ -179,6 +196,7 @@
       },
       "spec": {
         "replicas": 1,
+        "revisionHistoryLimit": 2,
         "strategy": {
           "type": "Recreate"
         },
@@ -195,20 +213,24 @@
             "containers": [
               {
                 "args": [
-                  {
-                    "kubegen.String.Join": [
-                      "--token=",
-                      {
-                        "kubegen.String.Lookup": "service-token"
-                      }
-                    ]
-                  },
+                  "--token=$(WEAVE_CLOUD_TOKEN)",
                   "--connect=wss://cloud.weave.works./api/flux",
                   "--memcached-hostname=weave-flux-memcached.weave.svc.cluster.local"
                 ],
-                "image": "quay.io/weaveworks/flux:1.2.1",
+                "env": [
+                  {
+                    "name": "WEAVE_CLOUD_TOKEN",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "token",
+                        "name": "weave-cloud"
+                      }
+                    }
+                  }
+                ],
+                "image": "quay.io/weaveworks/flux:1.2.3",
                 "imagePullPolicy": "IfNotPresent",
-                "name": "agent",
+                "name": "flux-agent",
                 "volumeMounts": [
                   {
                     "mountPath": "/etc/fluxd/ssh",
@@ -327,19 +349,22 @@
                   "--probe.docker.bridge=docker0",
                   "--probe.docker=true",
                   "--probe.kubernetes=true",
+                  "--service-token=$(WEAVE_CLOUD_TOKEN)"
+                ],
+                "env": [
                   {
-                    "kubegen.String.Join": [
-                      "https://",
-                      {
-                        "kubegen.String.Lookup": "service-token"
-                      },
-                      "cloud.weave.works"
-                    ]
+                    "name": "WEAVE_CLOUD_TOKEN",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "token",
+                        "name": "weave-cloud"
+                      }
+                    }
                   }
                 ],
-                "image": "weaveworks/scope:1.7.1",
+                "image": "weaveworks/scope:1.7.3",
                 "imagePullPolicy": "IfNotPresent",
-                "name": "agent",
+                "name": "scope-agent",
                 "securityContext": {
                   "privileged": true
                 },
@@ -477,6 +502,7 @@
       },
       "spec": {
         "replicas": 1,
+        "revisionHistoryLimit": 2,
         "template": {
           "metadata": {
             "annotations": {
@@ -495,17 +521,46 @@
                 "args": [
                   "-config.file=/etc/prometheus/prometheus.yml",
                   "-web.listen-address=:8080",
-                  "-web.external-url=/prometheus"
+                  "-storage.local.engine=none"
                 ],
                 "image": "prom/prometheus:v1.8.2",
                 "imagePullPolicy": "IfNotPresent",
-                "name": "agent",
+                "name": "prometheus",
                 "ports": [
                   {
                     "containerPort": 8080,
                     "protocol": "TCP"
                   }
                 ],
+                "volumeMounts": [
+                  {
+                    "mountPath": "/etc/weave-cloud",
+                    "name": "weave-cloud-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/prometheus",
+                    "name": "agent-config-volume"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "-v",
+                  "-t",
+                  "-p=/etc/prometheus",
+                  "curl",
+                  "-X",
+                  "POST",
+                  "--fail",
+                  "-o",
+                  "-",
+                  "-sS",
+                  "http://localhost:8080/-/reload"
+                ],
+                "image": "quay.io/weaveworks/watch:master-85fdf1d",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "watch-configmap",
                 "volumeMounts": [
                   {
                     "mountPath": "/etc/prometheus",
@@ -516,6 +571,12 @@
             ],
             "serviceAccountName": "weave-cortex",
             "volumes": [
+              {
+                "name": "weave-cloud-secret",
+                "secret": {
+                  "secretName": "weave-cloud"
+                }
+              },
               {
                 "configMap": {
                   "name": "weave-cortex-agent-config"
@@ -558,7 +619,7 @@
               {
                 "image": "prom/node-exporter:v0.14.0",
                 "imagePullPolicy": "IfNotPresent",
-                "name": "agent",
+                "name": "prom-node-exporter",
                 "ports": [
                   {
                     "containerPort": 9100,
@@ -601,6 +662,7 @@
       },
       "spec": {
         "replicas": 1,
+        "revisionHistoryLimit": 2,
         "template": {
           "metadata": {
             "annotations": {
