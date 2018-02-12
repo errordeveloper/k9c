@@ -126,6 +126,7 @@ items:
   metadata:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: test1.training.example.com.
+      external-dns.alpha.kubernetes.io/ttl: "5"
     creationTimestamp: null
     name: traefik
     namespace: kube-system

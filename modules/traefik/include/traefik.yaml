@@ -93,6 +93,7 @@ items:
       namespace: kube-system
       annotations:
         external-dns.alpha.kubernetes.io/hostname: {kubegen.String.Lookup: external-dns/domain}
+        external-dns.alpha.kubernetes.io/ttl: "5"
     spec:
       selector:
         k8s-app: traefik-ingress-lb
