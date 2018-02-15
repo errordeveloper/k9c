@@ -39,7 +39,7 @@ ConfigMaps:
           datasources: 
             - name: prometheus
               type: prometheus
-              access: direct
+              access: proxy
               url: http://prometheus.weave.svc.cluster.local/prometheus
               orgId: 1
               version: 1
