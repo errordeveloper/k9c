@@ -19,4 +19,3 @@ Parameters:
 Resources:
   - path: include/weave-cloud.json
   - path: include/prometheus-svc.json
-  - path: include/grafana.yaml

@@ -1,0 +1,56 @@
+Kind: kubegen.k8s.io/Module.v1alpha2
+
+Deployments:
+
+  - name: "grafana"
+    namespace: "weave"
+    replicas: 1
+    volumes:
+      - name: datasources
+        configMap:
+          name: grafana-datasources
+    containers:
+      - image: grafana/grafana:5.0.0-beta2
+        name: grafana
+        imagePullPolicy: Always
+        ports:
+          - name: grafana
+            containerPort: 3000
+        env:
+          GF_SERVER_ROOT_URL:
+              kubegen.String.Join:
+                - 'http://'
+                - {kubegen.String.Lookup: external-dns/domain}
+                - '/grafana'
+          GF_SECURITY_ADMIN_USER: {kubegen.String.Lookup: username}
+          GF_SECURITY_ADMIN_PASSWORD: {kubegen.String.Lookup: password}
+        volumeMounts:
+          - name: datasources
+            mountPath: /etc/grafana/provisioning/datasources
+
+ConfigMaps:
+
+  - name: "grafana-datasources"
+    namespace: "weave"
+    data:
+      prometheus.yaml:
+        kubegen.String.AsYAML:
+          apiVersion: 1
+          datasources: 
+            - name: prometheus
+              type: prometheus
+              access: direct
+              url: http://prometheus.weave.svc.cluster.local/prometheus
+              orgId: 1
+              version: 1
+              isDefault: true
+              editable: false
+
+Services:
+
+  - name: "grafana"
+    namespace: "weave"
+    ports:
+      - name: grafana
+        port: 80
+        targetPort: 3000
