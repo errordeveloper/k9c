@@ -2,6 +2,16 @@ Kind: kubegen.k8s.io/Module.v1alpha2
 
 Parameters:
 
+  - Name: username
+    Type: String
+    Default: username
+  - Name: password
+    Type: String
+    Default: password
+  - Name: external-dns/domain
+    Type: String
+    Default: test1.training.example.com.
+
   - Name: service-token
     Type: String
     Required: true
@@ -9,3 +19,4 @@ Parameters:
 Resources:
   - path: include/weave-cloud.json
   - path: include/prometheus-svc.json
+  - path: include/grafana.yaml

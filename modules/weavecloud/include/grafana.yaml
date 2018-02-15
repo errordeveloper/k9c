@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: List
+items:
+
+  - apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      name: grafana
+      namespace: weave
+      labels:
+        app: grafana
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            app: grafana
+        spec:
+          containers:
+          - image: grafana/grafana:5.0.0-beta1
+            name: grafana
+            imagePullPolicy: Always
+            ports:
+              - name: grafana
+                containerPort: 3000
+            env:
+              - name: GF_SERVER_ROOT_URL
+                value: 'http://grafana.weave.svc.cluster.local/grafana'
+              #- name: GF_SERVER_ROOT_URL
+              #  value:
+              #    kubegen.String.Join:
+              #      - 'http://'
+              #      - {kubegen.String.Lookup: external-dns/domain}
+              #      - '/'
+              #- name: GF_SERVER_STATIC_ROOT_PATH
+              #  value: '/grafana/public'
+              - name: GF_SECURITY_ADMIN_USER
+                value: {kubegen.String.Lookup: username}
+              - name: GF_SECURITY_ADMIN_PASSWORD
+                value: {kubegen.String.Lookup: password}
+          - name: gfdatasource
+            image: weaveworks/gfdatasource:master-1708580
+            imagePullPolicy: Always
+            args:
+              - kubegen.String.Join:
+                - '--grafana-url=http://'
+                - {kubegen.String.Lookup: username}
+                - ':'
+                - {kubegen.String.Lookup: password}
+                - '@127.0.0.1:3000/api'
+              - --data-source-url=http://prometheus.weave.svc.cluster.local
+              - --name=prometheus
+              - --type=prometheus
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: grafana
+      namespace: weave
+      labels:
+        app: grafana
+    spec:
+      type: ClusterIP
+      ports:
+        - name: grafana
+          protocol: TCP
+          port: 80
+          targetPort: 3000
+      selector:
+        app: grafana

@@ -40,6 +40,23 @@ items:
   - apiVersion: extensions/v1beta1
     kind: Ingress
     metadata:
+      name: grafana
+      namespace: weave
+      annotations:
+        kubernetes.io/ingress.class: {kubegen.String.Lookup: ingress/class}
+        traefik.frontend.rule.type: PathPrefixStrip
+    spec:
+      rules:
+      - http:
+          paths:
+          - path: /grafana
+            backend:
+              serviceName: grafana
+              servicePort: grafana
+
+  - apiVersion: extensions/v1beta1
+    kind: Ingress
+    metadata:
       name: prometheus
       namespace: weave
       annotations:
@@ -52,4 +69,3 @@ items:
             backend:
               serviceName: prometheus
               servicePort: prometheus
-
