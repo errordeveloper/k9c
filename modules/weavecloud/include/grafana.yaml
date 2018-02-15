@@ -28,8 +28,6 @@ items:
                 - name: grafana
                   containerPort: 3000
               env:
-                #- name: GF_SERVER_ROOT_URL
-                #  value: 'http://grafana.weave.svc.cluster.local/grafana'
                 - name: GF_SERVER_ROOT_URL
                   value:
                     kubegen.String.Join:
@@ -43,19 +41,6 @@ items:
               volumeMounts:
                 - name: datasources
                   mountPath: /etc/grafana/provisioning/datasources
-            #- name: gfdatasource
-            #  image: weaveworks/gfdatasource:master-1708580
-            #  imagePullPolicy: Always
-            #  args:
-            #    - kubegen.String.Join:
-            #      - '--grafana-url=http://'
-            #      - {kubegen.String.Lookup: username}
-            #      - ':'
-            #      - {kubegen.String.Lookup: password}
-            #      - '@127.0.0.1:3000/api'
-            #    - --data-source-url=http://prometheus.weave.svc.cluster.local/prometheus
-            #    - --access=direct
-            #    - --update-interval=3600
 
   - apiVersion: v1
     kind: ConfigMap
