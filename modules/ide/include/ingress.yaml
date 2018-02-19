@@ -32,9 +32,9 @@ items:
       rules:
       - http:
           paths:
-          - path: /app/metrics-demo
+          - path: /app
             backend:
-              serviceName: metrics-demo
+              serviceName: mighty-fine-fe
               servicePort: http
 
   - apiVersion: extensions/v1beta1
