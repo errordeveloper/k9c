@@ -261,9 +261,9 @@ items:
     - http:
         paths:
         - backend:
-            serviceName: metrics-demo
+            serviceName: mighty-fine-fe
             servicePort: http
-          path: /app/metrics-demo
+          path: /app
   status:
     loadBalancer: {}
 - apiVersion: extensions/v1beta1
