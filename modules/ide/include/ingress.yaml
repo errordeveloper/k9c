@@ -24,22 +24,6 @@ items:
   - apiVersion: extensions/v1beta1
     kind: Ingress
     metadata:
-      name: metrics-demo
-      namespace: {kubegen.String.Lookup: namespaces/workspace}
-      annotations:
-        kubernetes.io/ingress.class: {kubegen.String.Lookup: ingress/class}
-    spec:
-      rules:
-      - http:
-          paths:
-          - path: /app/metrics-demo
-            backend:
-              serviceName: metrics-demo
-              servicePort: http
-
-  - apiVersion: extensions/v1beta1
-    kind: Ingress
-    metadata:
       name: grafana
       namespace: weave
       annotations:
