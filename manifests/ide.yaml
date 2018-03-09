@@ -253,17 +253,18 @@ items:
   metadata:
     annotations:
       kubernetes.io/ingress.class: traefik
+      traefik.frontend.rule.type: PathPrefixStrip
     creationTimestamp: null
-    name: metrics-demo
-    namespace: ide-workspace
+    name: grafana
+    namespace: weave
   spec:
     rules:
     - http:
         paths:
         - backend:
-            serviceName: mighty-fine-fe
-            servicePort: http
-          path: /app
+            serviceName: grafana
+            servicePort: grafana
+          path: /grafana
   status:
     loadBalancer: {}
 - apiVersion: extensions/v1beta1
