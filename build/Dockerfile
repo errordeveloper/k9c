@@ -29,6 +29,7 @@ RUN apk add --no-cache --initdb --root /out \
     make \
     tmux \
     vim \
+    openssh-client \
     && true
 
 RUN mkdir -p /out/src/c9
@@ -56,7 +57,7 @@ RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' 
     && chmod +x usr/local/bin/kubectl
 
 RUN curl --silent --location 'https://download.docker.com/linux/static/stable/x86_64/docker-18.03.0-ce.tgz' \
-  | tar xz  && cp docker/docker usr/local/bin/docker
+  | tar xz && mv docker/docker usr/local/bin/docker && rm -rf docker
 
 RUN mkdir -p /out/workspace
 COPY in-cluster-config.yaml /out/etc/
