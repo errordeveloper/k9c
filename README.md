@@ -7,7 +7,8 @@ so all attendees need is a browser.
 
 Deploy it to a GKE cluster (or other provider with functional storage and external load balancers):
 ```
-kubectl create namespaces ide ide-workspace
+kubectl create namespace ide 
+kubectl create namespace ide-workspace
 kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/manifests/ide.yaml
 kubectl apply -f https://raw.github.com/errordeveloper/k9c/master/manifests/traefik.yaml
 ```
