@@ -55,8 +55,8 @@ WORKDIR /out
 RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output usr/local/bin/kubectl \
     && chmod +x usr/local/bin/kubectl
 
-RUN curl --silent --location 'https://get.docker.com/builds/Linux/x86_64/docker-1.10.3.tgz' \
-  | tar xz usr/local/bin/docker
+RUN curl --silent --location 'https://download.docker.com/linux/static/stable/x86_64/docker-18.03.0-ce.tgz' \
+  | tar xz  && cp docker/docker usr/local/bin/docker
 
 RUN mkdir -p /out/workspace
 COPY in-cluster-config.yaml /out/etc/
