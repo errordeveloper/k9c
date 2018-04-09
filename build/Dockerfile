@@ -62,7 +62,8 @@ RUN curl --silent --location 'https://download.docker.com/linux/static/stable/x8
 RUN mkdir -p /out/workspace
 COPY in-cluster-config.yaml /out/etc/
 
-FROM scratch
+FROM google/cloud-sdk:alpine
+COPY gcloud-git.sh /etc/profile.d/gcloud-git.sh
 WORKDIR /workspace
 ENV KUBECONFIG /etc/in-cluster-config.yaml
 ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "-w", "/workspace" ]
