@@ -248,7 +248,7 @@
                   },
                   {
                     "name": "ssh-keygen",
-                    "mountPath": "/etc/fluxd/keygen"
+                    "mountPath": "/var/fluxd/keygen"
                   }
                 ]
               }

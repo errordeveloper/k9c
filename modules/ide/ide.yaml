@@ -75,8 +75,8 @@ Deployments:
           initialDelaySeconds: 5
           periodSeconds: 1
         volumeMounts:
-          - mountPath: /root/.ssh
-            name: ssh-git
+          - name: ssh-git
+            mountPath: /root/.ssh
           - name: ide-workspace-data
             mountPath: /workspace
           - name: dockersocket
@@ -84,8 +84,8 @@ Deployments:
     volumes:
       - name: ssh-git
         secret:
-          defaultMode: 0600
           secretName: ssh-git
+          defaultMode: 256
       - name: ide-workspace-data
         persistentVolumeClaim:
           claimName: ide-workspace-data
