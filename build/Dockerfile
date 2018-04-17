@@ -8,7 +8,9 @@ RUN apk add --update \
     gcc \
     git \
     make \
+    py-pip \
     python \
+    python-dev \
     tmux \
     && true
 
@@ -28,7 +30,6 @@ RUN apk add --no-cache --initdb --root /out \
     libstdc++ \
     make \
     openssh-client \
-    py-crcmod \
     python \
     tmux \
     vim \
@@ -56,22 +57,23 @@ WORKDIR /out
 
 RUN ln -s /lib /lib64
 
-RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output usr/local/bin/kubectl \
+ENV KUBECTL_VERSION v1.9.1
+RUN curl --silent --location "https://dl.k8s.io/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" --output usr/local/bin/kubectl \
     && chmod +x usr/local/bin/kubectl
 
-RUN curl --silent --location 'https://download.docker.com/linux/static/stable/x86_64/docker-18.03.0-ce.tgz' \
+ENV DOCKER_VERSION 18.03.0
+RUN curl --silent --location "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}-ce.tgz" \
     | tar xz docker/docker && mv docker/docker usr/local/bin/docker && rm -rf docker
 
-ENV CLOUD_SDK_VERSION 196.0.0
-ENV PATH /google-cloud-sdk/bin:$PATH
-
-RUN curl --silent --location 'https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz' \
-    | tar xz
+ENV GCLOUD_VERSION 196.0.0
+RUN curl --silent --location "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz" \
+    | tar xz \
+    && pip install --root=/out crcmod==1.7
 
 RUN mkdir -p /out/workspace
 
 COPY in-cluster-config.yaml /out/etc/
-COPY gcloud-git.sh /etc/profile.d/
+COPY gcloud-git.sh /out/etc/profile.d/
 
 FROM scratch
 
