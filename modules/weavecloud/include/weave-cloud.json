@@ -215,7 +215,11 @@
                 "args": [
                   "--token=$(WEAVE_CLOUD_TOKEN)",
                   "--connect=wss://cloud.weave.works./api/flux",
-                  "--memcached-hostname=weave-flux-memcached.weave.svc.cluster.local"
+                  "--memcached-hostname=weave-flux-memcached.weave.svc.cluster.local",
+                  "--ssh-keygen-dir=/var/fluxd/keygen",
+                  "--k8s-secret-name=ssh-git",
+                  "--git-url=ssh://git@git-server.ide.svc.cluster.local./git-server/repos/cluster.git",
+                  "--git-branch=master"
                 ],
                 "env": [
                   {
@@ -228,13 +232,23 @@
                     }
                   }
                 ],
-                "image": "quay.io/weaveworks/flux:1.2.3",
+                "image": "quay.io/weaveworks/flux:1.2.5",
                 "imagePullPolicy": "IfNotPresent",
                 "name": "flux-agent",
                 "volumeMounts": [
                   {
-                    "mountPath": "/etc/fluxd/ssh",
-                    "name": "git-key"
+                    "name": "ssh-git",
+                    "mountPath": "/root/.ssh",
+                    "readOnly": true
+                  },
+                  {
+                    "name": "ssh-git",
+                    "mountPath": "/etc/flux/ssh",
+                    "readOnly": true
+                  },
+                  {
+                    "name": "ssh-keygen",
+                    "mountPath": "/etc/fluxd/keygen"
                   }
                 ]
               }
@@ -242,9 +256,16 @@
             "serviceAccountName": "weave-flux",
             "volumes": [
               {
-                "name": "git-key",
+                "name": "ssh-git",
                 "secret": {
-                  "secretName": "flux-git-deploy"
+                  "secretName": "ssh-git",
+                  "defaultMode": 256
+                }
+              },
+              {
+                "name": "ssh-keygen",
+                "emptyDir": {
+                  "medium": "Memory"
                 }
               }
             ]

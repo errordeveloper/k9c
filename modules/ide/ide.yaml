@@ -16,14 +16,13 @@ Parameters:
     Default: errordeveloper/k9c
   - Name: images/ide-digest
     Type: String
-    Default: 74afb6e7b76fb9895f86f13daf4909c094f3edee756b325b88a8ea417775a01a
+    Default: ecc2a0ab692b3279da8f6e8c46253e1f0a03de597ae983008c5e99d796518f75
 
-  - Name: workspace/repo-url
+  - Name: workspace/init-script
     Type: String
-    Default: https://github.com/bricef/metrics-demo
-  - Name: workspace/repo-checkout-path
-    Type: String
-    Default: demo-app
+    Default: |
+      test -d /workspace/demo-app \
+        || git clone https://github.com/bricef/metrics-demo /workspace/demo-app
 
   ## As plain resources do not allow us to override namespace
   ## we have namespaces set here
@@ -50,14 +49,10 @@ Deployments:
         command:
           - '/bin/sh'
           - '-c'
-          - kubegen.String.Join:
-            - 'test -d /workspace/'
-            - {kubegen.String.Lookup: 'workspace/repo-checkout-path'}
-            - ' || git clone '
-            - {kubegen.String.Lookup: 'workspace/repo-url'}
-            - ' '
-            - {kubegen.String.Lookup: 'workspace/repo-checkout-path'}
+          - kubegen.String.Lookup: 'workspace/init-script'
         volumeMounts:
+          - mountPath: /root/.ssh
+            name: ssh-git
           - name: ide-workspace-data
             mountPath: /workspace
     containers:
@@ -66,6 +61,8 @@ Deployments:
         args:
           - "--auth"
           - {kubegen.Object.Lookup: internals/auth}
+        env:
+          IDE_USERNAME: {kubegen.String.Lookup: username}
         ports:
           - name: http
             containerPort: 8080
@@ -78,17 +75,47 @@ Deployments:
           initialDelaySeconds: 5
           periodSeconds: 1
         volumeMounts:
+          - mountPath: /root/.ssh
+            name: ssh-git
           - name: ide-workspace-data
             mountPath: /workspace
           - name: dockersocket
             mountPath: /var/run/docker.sock
     volumes:
+      - name: ssh-git
+        secret:
+          defaultMode: 0600
+          secretName: ssh-git
       - name: ide-workspace-data
         persistentVolumeClaim:
           claimName: ide-workspace-data
       - name: dockersocket
         hostPath:
           path: /var/run/docker.sock
+
+  - name: git-server
+    namespace: {kubegen.String.Lookup: namespaces/ide}
+    containers:
+      - name: git
+        image: stefanprodan/gitsrv:0.0.5
+        env:
+          REPO: "cluster.git"
+          TAR_URL: "https://github.com/stefanprodan/kubecon-cluster/archive/0.0.1.tar.gz"
+        ports:
+          - name: ssh
+            containerPort: 22
+        volumeMounts:
+          - name: ssh-git
+            mountPath: /git-server/keys
+          - name: git-server-data
+            mountPath: /git-server/repos
+    volumes:
+      - name: ssh-git
+        secret:
+          secretName: ssh-git
+      - name: git-server-data
+        persistentVolumeClaim:
+          claimName: git-server-data
 
 Services:
 
@@ -97,6 +124,12 @@ Services:
     ports:
       - name: http
         port: 80
+
+  - name: git-server
+    namespace: {kubegen.String.Lookup: namespaces/ide}
+    ports:
+      - name: ssh
+        port: 22
 
 Internals:
 
@@ -132,3 +165,4 @@ Resources:
   - path: include/rbac.yaml
   - path: include/pv.yaml
   - path: include/ingress.yaml
+  - path: include/ssh-git.yaml
