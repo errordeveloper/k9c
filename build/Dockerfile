@@ -27,9 +27,11 @@ RUN apk add --no-cache --initdb --root /out \
     libgcc \
     libstdc++ \
     make \
+    openssh-client \
+    py-crcmod \
+    python \
     tmux \
     vim \
-    openssh-client \
     && true
 
 RUN mkdir -p /out/src/c9
@@ -50,20 +52,29 @@ RUN mkdir -p /out/root/.c9 ; cd /out/root/.c9 ; \
 
 RUN rm -rf /out/etc/apk /out/lib/apk /out/var/cache
 
-
 WORKDIR /out
+
+RUN ln -s /lib /lib64
 
 RUN curl --silent --location 'https://dl.k8s.io/v1.9.1/bin/linux/amd64/kubectl' --output usr/local/bin/kubectl \
     && chmod +x usr/local/bin/kubectl
 
 RUN curl --silent --location 'https://download.docker.com/linux/static/stable/x86_64/docker-18.03.0-ce.tgz' \
-  | tar xz && mv docker/docker usr/local/bin/docker && rm -rf docker
+    | tar xz docker/docker && mv docker/docker usr/local/bin/docker && rm -rf docker
+
+ENV CLOUD_SDK_VERSION 196.0.0
+ENV PATH /google-cloud-sdk/bin:$PATH
+
+RUN curl --silent --location 'https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz' \
+    | tar xz
 
 RUN mkdir -p /out/workspace
-COPY in-cluster-config.yaml /out/etc/
 
-FROM google/cloud-sdk:alpine
-COPY gcloud-git.sh /etc/profile.d/gcloud-git.sh
+COPY in-cluster-config.yaml /out/etc/
+COPY gcloud-git.sh /etc/profile.d/
+
+FROM scratch
+
 WORKDIR /workspace
 ENV KUBECONFIG /etc/in-cluster-config.yaml
 ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "-w", "/workspace" ]
