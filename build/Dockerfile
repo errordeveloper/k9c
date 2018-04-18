@@ -25,6 +25,7 @@ RUN apk add --no-cache --initdb --root /out \
     coreutils \
     curl \
     git \
+    jq \
     libc6-compat \
     libgcc \
     libstdc++ \
@@ -74,6 +75,7 @@ RUN mkdir -p /out/workspace
 
 COPY in-cluster-config.yaml /out/etc/
 COPY gcloud-git.sh /out/etc/profile.d/
+COPY clone-repos.sh /out/usr/local/bin
 
 FROM scratch
 

@@ -16,13 +16,17 @@ Parameters:
     Default: errordeveloper/k9c
   - Name: images/ide-digest
     Type: String
-    Default: ecc2a0ab692b3279da8f6e8c46253e1f0a03de597ae983008c5e99d796518f75
+    Default: d10a0cfab0286f85d551dc50f8fc65ae3d1a2d312eced340bdb7da8972b4db4c
 
-  - Name: workspace/init-script
+  - Name: workspace/clone-repos
     Type: String
     Default: |
-      test -d /workspace/demo-app \
-        || git clone https://github.com/bricef/metrics-demo /workspace/demo-app
+        [
+          {
+            "repo_url": "https://github.com/bricef/metrics-demo",
+            "checkout_path": "/workspace/demo-app"
+          }
+        ]
 
   ## As plain resources do not allow us to override namespace
   ## we have namespaces set here
@@ -47,9 +51,8 @@ Deployments:
       - name: git-clone
         image: {kubegen.Object.Lookup: internals/images/ide-name}
         command:
-          - '/bin/sh'
-          - '-c'
-          - kubegen.String.Lookup: 'workspace/init-script'
+          - 'clone-repos.sh'
+          - kubegen.String.Lookup: 'workspace/clone-repos'
         volumeMounts:
           - mountPath: /root/.ssh
             name: ssh-git
@@ -97,7 +100,7 @@ Deployments:
     namespace: {kubegen.String.Lookup: namespaces/ide}
     containers:
       - name: git
-        image: stefanprodan/gitsrv:0.0.5
+        image: stefanprodan/gitsrv:0.0.6
         env:
           REPO: "cluster.git"
           TAR_URL: "https://github.com/stefanprodan/kubecon-cluster/archive/0.0.1.tar.gz"

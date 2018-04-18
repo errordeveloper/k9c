@@ -218,7 +218,7 @@
                   "--memcached-hostname=weave-flux-memcached.weave.svc.cluster.local",
                   "--ssh-keygen-dir=/var/fluxd/keygen",
                   "--k8s-secret-name=ssh-git",
-                  "--git-url=ssh://git@git-server.ide.svc.cluster.local./git-server/repos/cluster.git",
+                  "--git-url=ssh://git@git-server.ide.svc.cluster.local./~/cluster.git",
                   "--git-branch=master"
                 ],
                 "env": [
