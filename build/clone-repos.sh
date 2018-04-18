@@ -4,6 +4,8 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+source "/etc/profile.d/gcloud-git.sh"
+
 repos=($(echo "${1}" | jq -c '.[]'))
 
 for repo in "${repos[@]}" ; do
