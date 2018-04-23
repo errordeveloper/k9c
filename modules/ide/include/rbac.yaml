@@ -25,15 +25,15 @@ items:
         name:
           kubegen.String.Join:
             - {kubegen.String.Lookup: namespaces/ide}
-            - -cluster-view
+            - -cluster-admin
         labels:
           name: ide
       rules:
         - apiGroups: [ '*' ]
           resources: [ '*' ]
-          verbs: [ 'get', 'list', 'watch' ]
+          verbs: [ '*' ]
         - nonResourceURLs: [ '*' ]
-          verbs: [ 'get', 'list', 'watch' ]
+          verbs: [ '*' ]
 
   - apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRoleBinding
@@ -41,7 +41,7 @@ items:
       name:
         kubegen.String.Join:
           - {kubegen.String.Lookup: namespaces/ide}
-          - -cluster-view
+          - -cluster-admin
       labels:
         name: ide
     roleRef:
@@ -49,12 +49,51 @@ items:
       name:
         kubegen.String.Join:
           - {kubegen.String.Lookup: namespaces/ide}
-          - -cluster-view
+          - -cluster-admin
       apiGroup: rbac.authorization.k8s.io
     subjects:
       - kind: ServiceAccount
-        name: ide 
+        name: ide
         namespace: {kubegen.String.Lookup: namespaces/ide}
+
+  # see https://github.com/errordeveloper/k9c/issues/10
+
+  #   - apiVersion: rbac.authorization.k8s.io/v1beta1
+  #     kind: ClusterRole
+  #     metadata:
+  #       name:
+  #         kubegen.String.Join:
+  #           - {kubegen.String.Lookup: namespaces/ide}
+  #           - -cluster-view
+  #       labels:
+  #         name: ide
+  #     rules:
+  #       - apiGroups: [ '*' ]
+  #         resources: [ '*' ]
+  #         verbs: [ 'get', 'list', 'watch' ]
+  #       - nonResourceURLs: [ '*' ]
+  #         verbs: [ 'get', 'list', 'watch' ]
+
+  # - apiVersion: rbac.authorization.k8s.io/v1beta1
+  #   kind: ClusterRoleBinding
+  #   metadata:
+  #     name:
+  #       kubegen.String.Join:
+  #         - {kubegen.String.Lookup: namespaces/ide}
+  #         - -cluster-view
+  #     labels:
+  #       name: ide
+  #   roleRef:
+  #     kind: ClusterRole
+  #     name:
+  #       kubegen.String.Join:
+  #         - {kubegen.String.Lookup: namespaces/ide}
+  #         - -cluster-view
+  #     apiGroup: rbac.authorization.k8s.io
+  #   subjects:
+  #     - kind: ServiceAccount
+  #       name: ide
+  #       namespace: {kubegen.String.Lookup: namespaces/ide}
 
   - apiVersion: v1
     kind: List
@@ -65,40 +104,39 @@ items:
       metadata:
         name: {kubegen.String.Lookup: namespaces/workspace}
 
-    - apiVersion: rbac.authorization.k8s.io/v1beta1
-      kind: Role
-      metadata:
-        name:
-          kubegen.String.Join:
-            - {kubegen.String.Lookup: namespaces/workspace}
-            - -workspace-admin
-        namespace: {kubegen.String.Lookup: namespaces/workspace}
-        labels:
-          name: ide
-      rules:
-        - apiGroups: [ '*' ]
-          resources: [ '*' ]
-          verbs: [ '*' ]
+  #   - apiVersion: rbac.authorization.k8s.io/v1beta1
+  #     kind: Role
+  #     metadata:
+  #       name:
+  #         kubegen.String.Join:
+  #           - {kubegen.String.Lookup: namespaces/workspace}
+  #           - -workspace-admin
+  #       namespace: {kubegen.String.Lookup: namespaces/workspace}
+  #       labels:
+  #         name: ide
+  #     rules:
+  #       - apiGroups: [ '*' ]
+  #         resources: [ '*' ]
+  #         verbs: [ '*' ]
 
-    - apiVersion: rbac.authorization.k8s.io/v1beta1
-      kind: RoleBinding
-      metadata:
-        name:
-          kubegen.String.Join:
-            - {kubegen.String.Lookup: namespaces/workspace}
-            - -workspace-admin
-        namespace: {kubegen.String.Lookup: namespaces/workspace}
-        labels:
-          name: ide
-      roleRef:
-        kind: Role
-        name:
-          kubegen.String.Join:
-            - {kubegen.String.Lookup: namespaces/workspace}
-            - -workspace-admin
-        apiGroup: rbac.authorization.k8s.io
-      subjects:
-        - kind: ServiceAccount
-          name: ide
-          namespace: {kubegen.String.Lookup: namespaces/ide}
-
+  #   - apiVersion: rbac.authorization.k8s.io/v1beta1
+  #     kind: RoleBinding
+  #     metadata:
+  #       name:
+  #         kubegen.String.Join:
+  #           - {kubegen.String.Lookup: namespaces/workspace}
+  #           - -workspace-admin
+  #       namespace: {kubegen.String.Lookup: namespaces/workspace}
+  #       labels:
+  #         name: ide
+  #     roleRef:
+  #       kind: Role
+  #       name:
+  #         kubegen.String.Join:
+  #           - {kubegen.String.Lookup: namespaces/workspace}
+  #           - -workspace-admin
+  #       apiGroup: rbac.authorization.k8s.io
+  #     subjects:
+  #       - kind: ServiceAccount
+  #         name: ide
+  #         namespace: {kubegen.String.Lookup: namespaces/ide}
