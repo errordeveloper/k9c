@@ -10,5 +10,9 @@ Parameters:
     Type: String
     Required: true
 
+  - Name: username
+    Type: String
+    Required: true
+
 Resources:
   - path: include/external-dns.yaml
