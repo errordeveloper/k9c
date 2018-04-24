@@ -219,7 +219,10 @@
                   "--ssh-keygen-dir=/var/fluxd/keygen",
                   "--k8s-secret-name=ssh-git",
                   "--git-url=ssh://git@git-server.ide.svc.cluster.local./~/cluster.git",
-                  "--git-branch=master"
+                  "--git-branch=master",
+                  "--git-poll-interval=30s",
+                  "--registry-poll-interval=30s",
+                  "--registry-rps=200"
                 ],
                 "env": [
                   {
