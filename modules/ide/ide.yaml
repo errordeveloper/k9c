@@ -100,7 +100,7 @@ Deployments:
     namespace: {kubegen.String.Lookup: namespaces/ide}
     containers:
       - name: git
-        image: stefanprodan/gitsrv:0.0.6
+        image: stefanprodan/gitsrv:0.0.8
         env:
           REPO: "cluster.git"
           TAR_URL: "https://github.com/stefanprodan/kubecon-cluster/archive/0.0.1.tar.gz"
