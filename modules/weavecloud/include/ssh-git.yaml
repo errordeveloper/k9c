@@ -9,8 +9,8 @@ type: Opaque
 data:
   known_hosts:
     kubegen.String.AsBASE64: |
-      git-server ecdsa-sha2-nistp256 AAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLhQnVgMoas/3nXWsOVz/vNB/vtPwH1gRCdYKrYgYGFMfhunyQ2ITwKYoWkFgmtcGdC9gmS+AbvgqHJxwWzIsHE=
-      git-server.ide.svc.cluster.local. ecdsa-sha2-nistp256 AAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLhQnVgMoas/3nXWsOVz/vNB/vtPwH1gRCdYKrYgYGFMfhunyQ2ITwKYoWkFgmtcGdC9gmS+AbvgqHJxwWzIsHE=
+      git-server ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLhQnVgMoas/3nXWsOVz/vNB/vtPwH1gRCdYKrYgYGFMfhunyQ2ITwKYoWkFgmtcGdC9gmS+AbvgqHJxwWzIsHE=
+      git-server.ide.svc.cluster.local. ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLhQnVgMoas/3nXWsOVz/vNB/vtPwH1gRCdYKrYgYGFMfhunyQ2ITwKYoWkFgmtcGdC9gmS+AbvgqHJxwWzIsHE=
   identity:
     kubegen.String.AsBASE64: |
       -----BEGIN RSA PRIVATE KEY-----
