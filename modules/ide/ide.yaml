@@ -100,7 +100,10 @@ Deployments:
     namespace: {kubegen.String.Lookup: namespaces/ide}
     containers:
       - name: git
-        image: stefanprodan/gitsrv:0.0.8
+        # NOTE for new image of gitsrv you may need to update ssh-git secret in this module and weavecloud also,
+        # but only if it was rebuild without layer cache
+        # TODO long term, it'd probably be easier/reliable to use bare repos instead of gitsrv
+        image: stefanprodan/gitsrv:0.0.10
         env:
           REPO: "cluster.git"
           TAR_URL: "https://github.com/stefanprodan/kubecon-cluster/archive/0.0.1.tar.gz"
