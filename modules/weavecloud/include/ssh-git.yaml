@@ -9,12 +9,8 @@ type: Opaque
 data:
   known_hosts:
     kubegen.String.AsBASE64: |
-      git-server ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDt65M0saFA6Ewsjc8mQ405bI406BsFSJrbGz9GFrbWBn0Rs3Loi4S6ADWgTWlcspHvbfmf7vXW9oiTjxeke8oHPCfFYrHFdPK26Big2J1kE2DzRONizZWcdw8dpqRhvxlt2+/EJuuay8CGXz3VLCV8NgJc5AYmAwNPknUhWKxaAzjwvRd/0cyXr4vvcTDcmwR63oiWcRPkHCZ5LClFuZE065Ulm2o6CgItl+e6M5ouDSJWZDpYWWmmJJJv1DQoRruNbaf5f4bgWVkKjrQ/0cA4iWWlkwJMlAWQgp9saD0G2F83hrf2XapM/clWTFybkzPqPqaw2BEwXP6vWp6A1iUR
-      git-server.ide.svc.cluster.local. ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDt65M0saFA6Ewsjc8mQ405bI406BsFSJrbGz9GFrbWBn0Rs3Loi4S6ADWgTWlcspHvbfmf7vXW9oiTjxeke8oHPCfFYrHFdPK26Big2J1kE2DzRONizZWcdw8dpqRhvxlt2+/EJuuay8CGXz3VLCV8NgJc5AYmAwNPknUhWKxaAzjwvRd/0cyXr4vvcTDcmwR63oiWcRPkHCZ5LClFuZE065Ulm2o6CgItl+e6M5ouDSJWZDpYWWmmJJJv1DQoRruNbaf5f4bgWVkKjrQ/0cA4iWWlkwJMlAWQgp9saD0G2F83hrf2XapM/clWTFybkzPqPqaw2BEwXP6vWp6A1iUR
-      git-server ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBM6WyUxQRPtZhYLxjG6YRQOHD/SX/+uI4XBo44UTSu21uqmf/lG8cLWTdMVzDlUDY9/Dx4tFz96LT97kUC1pLJs=
-      git-server.ide.svc.cluster.local. ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBM6WyUxQRPtZhYLxjG6YRQOHD/SX/+uI4XBo44UTSu21uqmf/lG8cLWTdMVzDlUDY9/Dx4tFz96LT97kUC1pLJs=
-      git-server ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAMv1z2YnDug5M4Klp3FMbBvw9NdFrx7Om5uEKFQs07t
-      git-server.ide.svc.cluster.local. ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAMv1z2YnDug5M4Klp3FMbBvw9NdFrx7Om5uEKFQs07t
+      git-server ecdsa-sha2-nistp256 AAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLhQnVgMoas/3nXWsOVz/vNB/vtPwH1gRCdYKrYgYGFMfhunyQ2ITwKYoWkFgmtcGdC9gmS+AbvgqHJxwWzIsHE=
+      git-server.ide.svc.cluster.local. ecdsa-sha2-nistp256 AAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLhQnVgMoas/3nXWsOVz/vNB/vtPwH1gRCdYKrYgYGFMfhunyQ2ITwKYoWkFgmtcGdC9gmS+AbvgqHJxwWzIsHE=
   identity:
     kubegen.String.AsBASE64: |
       -----BEGIN RSA PRIVATE KEY-----
