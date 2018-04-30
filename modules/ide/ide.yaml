@@ -106,7 +106,8 @@ Deployments:
         image: stefanprodan/gitsrv:0.0.10
         env:
           REPO: "cluster.git"
-          TAR_URL: "https://github.com/stefanprodan/kubecon-cluster/archive/0.0.1.tar.gz"
+          TAR_URL: "https://storage.googleapis.com/kubecon0518/kubecon-cluster-master.tar.gz"
+          #TAR_URL: "https://storage.googleapis.com/kubecon0518/kubecon-cluster-e2e-test.tar.gz"
         ports:
           - name: ssh
             containerPort: 22
