@@ -77,9 +77,12 @@ COPY in-cluster-config.yaml /out/etc/
 COPY gcloud-git.sh /out/etc/profile.d/
 COPY clone-repos.sh /out/usr/local/bin
 
+FROM stefanprodan/loadtest as loadtest
+
 FROM scratch
 
 WORKDIR /workspace
 ENV KUBECONFIG /etc/in-cluster-config.yaml
 ENTRYPOINT [ "node", "/src/c9/core/server.js", "--listen", "0.0.0.0", "--port", "8080", "-w", "/workspace" ]
 COPY --from=build  /out /
+COPY --from=loadtest /go/bin/hey /usr/local/bin/hey
