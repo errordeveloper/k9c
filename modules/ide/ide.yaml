@@ -16,7 +16,7 @@ Parameters:
     Default: errordeveloper/k9c
   - Name: images/ide-digest
     Type: String
-    Default: 35e7d9f156819ca7e0a4840569b114ac04a6b97e1b209888e72f3f363b3555ff
+    Default: 675d78c6645f202f9e84863d80595a8b8d427bef5bffdf00b1f138368081821a
 
   - Name: workspace/clone-repos
     Type: String
