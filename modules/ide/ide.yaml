@@ -14,9 +14,14 @@ Parameters:
   - Name: images/ide-basename
     Type: String
     Default: errordeveloper/k9c
+
   - Name: images/ide-digest
     Type: String
     Default: 675d78c6645f202f9e84863d80595a8b8d427bef5bffdf00b1f138368081821a
+
+  - Name: config-repo/tar-url
+    Type: String
+    Default: "https://storage.googleapis.com/kubecon0518/kubecon-cluster-e2e-test.tar.gz"
 
   - Name: workspace/clone-repos
     Type: String
@@ -106,8 +111,7 @@ Deployments:
         image: stefanprodan/gitsrv:0.0.10
         env:
           REPO: "cluster.git"
-          TAR_URL: "https://storage.googleapis.com/kubecon0518/workshop-cluster-velocity.tar.gz"
-          #TAR_URL: "https://storage.googleapis.com/kubecon0518/kubecon-cluster-e2e-test.tar.gz"
+          TAR_URL: {kubegen.String.Lookup: config-repo/tar-url}
         ports:
           - name: ssh
             containerPort: 22
