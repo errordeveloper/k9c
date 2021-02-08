@@ -58,12 +58,12 @@ WORKDIR /out
 
 RUN ln -s /lib /lib64
 
-ENV KUBECTL_VERSION v1.9.1
+ENV KUBECTL_VERSION v1.20.0
 RUN curl --silent --location "https://dl.k8s.io/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" --output usr/local/bin/kubectl \
     && chmod +x usr/local/bin/kubectl
 
-ENV DOCKER_VERSION 18.03.0
-RUN curl --silent --location "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}-ce.tgz" \
+ENV DOCKER_VERSION 20.10.3
+RUN curl --silent --location "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" \
     | tar xz docker/docker && mv docker/docker usr/local/bin/docker && rm -rf docker
 
 ENV GCLOUD_VERSION 196.0.0
